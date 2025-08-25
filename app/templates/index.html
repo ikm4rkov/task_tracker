@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Tracker</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #task-form { margin-bottom: 20px; }
+        #tasks { margin-top: 20px; }
+        .task { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+        .task h4 { margin: 0; }
+        .task button { margin-right: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Task Tracker</h1>
+
+    <div id="task-form">
+        <h3>Add or Edit Task</h3>
+        <input type="hidden" id="task-id" />
+        <input type="text" id="title" placeholder="Title" required />
+        <input type="text" id="description" placeholder="Description" />
+        <label>
+            <input type="checkbox" id="duplicate" onchange="toggleButtons()" />
+            Add mode / Edit mode
+        </label>
+        <button id="save-btn" onclick="saveTask()" style="display: none;">Update Task</button>
+        <button id="create-btn" onclick="createNewTask()" style="display: none;">Create Task</button>
+    </div>
+
+    <div id="tasks">
+        <h3>Tasks</h3>
+        <div id="task-list"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = "/api/tasks/";
+
+        function toggleButtons() {
+            const duplicate = document.getElementById("duplicate").checked;
+            document.getElementById("save-btn").style.display = duplicate ? "none" : "inline-block";
+            document.getElementById("create-btn").style.display = duplicate ? "inline-block" : "none";
+        }
+
+        async function fetchTasks() {
+            const response = await fetch(API_BASE_URL);
+            if (response.ok) {
+                const tasks = await response.json();
+                const taskList = document.getElementById("task-list");
+                taskList.innerHTML = "";
+                tasks.forEach(task => {
+                    const taskDiv = document.createElement("div");
+                    taskDiv.className = "task";
+                    taskDiv.innerHTML = `
+                        <h4>${task.title}</h4>
+                        <p>${task.description || ""}</p>
+                        <button data-id="${task.id}" data-title="${task.title}" data-desc="${task.description || ""}" class="edit-btn">Edit</button>
+                        <button data-id="${task.id}" class="delete-btn">Delete</button>
+                    `;
+                    taskList.appendChild(taskDiv);
+                });
+
+                // Навешиваем обработчики
+                document.querySelectorAll(".edit-btn").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        editTask(btn.dataset.id, btn.dataset.title, btn.dataset.desc);
+                    });
+                });
+                document.querySelectorAll(".delete-btn").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        deleteTask(btn.dataset.id);
+                    });
+                });
+            } else {
+                alert("Failed to fetch tasks.");
+            }
+        }
+
+        async function createNewTask() {
+            const title = document.getElementById("title").value;
+            const description = document.getElementById("description").value;
+
+            if (!title) {
+                alert("Title is required.");
+                return;
+            }
+
+            const response = await fetch(API_BASE_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title, description })
+            });
+
+            if (response.ok) {
+                clearForm();
+                fetchTasks();
+            } else {
+                alert("Failed to create task.");
+            }
+        }
+
+        async function saveTask() {
+            const id = document.getElementById("task-id").value;
+            const title = document.getElementById("title").value;
+            const description = document.getElementById("description").value;
+
+            if (!title || !id) {
+                alert("Title and Task ID are required.");
+                return;
+            }
+
+            const response = await fetch(`${API_BASE_URL}${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title, description })
+            });
+
+            if (response.ok) {
+                clearForm();
+                fetchTasks();
+            } else {
+                alert("Failed to save task.");
+            }
+        }
+
+        function editTask(id, title, description) {
+            document.getElementById("task-id").value = id;
+            document.getElementById("title").value = title;
+            document.getElementById("description").value = description;
+            document.getElementById("duplicate").checked = false;
+            toggleButtons();
+        }
+
+        async function deleteTask(taskId) {
+            const response = await fetch(`${API_BASE_URL}${taskId}`, { method: "DELETE" });
+            if (response.ok) {
+                fetchTasks();
+            } else {
+                alert("Failed to delete task.");
+            }
+        }
+
+        function clearForm() {
+            document.getElementById("task-id").value = "";
+            document.getElementById("title").value = "";
+            document.getElementById("description").value = "";
+            document.getElementById("duplicate").checked = false;
+            toggleButtons();
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            toggleButtons();
+            fetchTasks();
+        });
+    </script>
+</body>
+</html>
