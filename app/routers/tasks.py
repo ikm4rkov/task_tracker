@@ -44,7 +44,7 @@ def update_task(
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    for key, value in task_update.dict(exclude_unset=True).items():
+    for key, value in task_update.model_dump(exclude_unset=True).items():
         setattr(task, key, value)
 
     db.commit()
