@@ -16,25 +16,23 @@
 
 ## Структура проекта
 
-task_manager/
-├─ app/
-│ ├─ routers/
-│ │ └─ tasks.py # API роуты, реализуют CRUD
-│ ├─ templates/
-│ │ └─ index.html # Веб-интерфейс
-│ ├─ database.py # Настройка SQLAlchemy
-│ ├─ models.py # Модель Task
-│ ├─ schemas.py # Pydantic схемы
-│ └─ main.py # Точка входа FastAPI приложения
-├─ data/
-│ └─ test.db # SQLite база (создаётся автоматически)
-├─ tests/
-│ ├─ conftest.py
-│ └─ test_tasks.py # Тесты
-├─ requirements.txt # Python зависимости
-├─ Dockerfile
-├─ docker-compose.yml
-└─ README.md
+- task_manager/
+  - app/
+    - routers/
+      - tasks.py — API роуты, реализуют CRUD
+    - templates/
+      - index.html — Веб-интерфейс
+    - database.py — настройка SQLAlchemy
+    - models.py — модель Task
+    - schemas.py — Pydantic схемы
+    - main.py — точка входа FastAPI приложения
+  - tests/
+    - conftest.py
+    - test_tasks.py — тесты
+  - requirements.txt — Python зависимости
+  - Dockerfile
+  - docker-compose.yml
+  - README.md
 ---
 
 ## Установка и запуск
@@ -42,7 +40,7 @@ task_manager/
 ### Локально (Python 3.10+)
 1. Клонирование репозитория:
 ```bash
-git clone <URL репозитория>
+git clone https://github.com/ikm4rkov/task_tracker
 cd task_manager
 ```
 2. Создание виртуального окружения:
